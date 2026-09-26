@@ -2,7 +2,7 @@
 
 A prime sieve built on the blocks **(4n − 1)(2n − 1)**, originally written by Dominika
 as a T-SQL stored procedure (`dbo.prime_search`, `dbo.prime_search2`, 2024) and ported
-to Python (`primes-sieve-bydomi.py`, 2026) with a compiled Numba kernel.
+to Python (`primes-sieve-bydomi.py`, 2026) with a compiled Numba kernel [18].
 
 Starting from a prime `p`, **one pass over the blocks marks every composite number in a
 window above `p`**. Whatever stays unmarked is prime. The next prime is the first unmarked
@@ -25,7 +25,7 @@ At `p ≈ 1.7·10¹⁵` one pass takes about 1 second and returns ~830,000 prime
 8. [Performance and comparison with Miller-Rabin](#8-performance-and-comparison-with-miller-rabin)
 9. [Verification](#9-verification)
 10. [Limits and possible improvements](#10-limits-and-possible-improvements)
-11. [Files](#11-files)
+11. [References](#references)
 
 ---
 
@@ -154,7 +154,7 @@ fills the rest of the tooth into the window and jumps to the next one.
 Near `√N` the teeth are narrower than one block (`N/(q(q − 2)) < 1` for `q > √N`), so not every
 odd `q` gets a block. For `N = 87,517`: of 209 odd `q` from 3 to 419 only 191 get a block.
 
-**Relation to Eratosthenes.** The procedure is a segmented sieve over the window with the order
+**Relation to Eratosthenes.** The procedure is a segmented sieve [15] over the window with the order
 of divisors reversed. Eratosthenes crosses out multiples of small primes `q = 2, 3, 5, …` upward.
 This sieve walks the larger factor `d` upward from `√(N/2)`, so the smaller factor
 `q = N/d` goes down to 3. The teeth let it discover each `q` without knowing it in advance.
@@ -212,8 +212,8 @@ One pass from `p = 1,693,182,318,746,371`:
 | next prime | p + 1,132 (a record prime gap, 0.004 % of the window) |
 
 **Why the next prime is always inside the window.** The window grows like `√p`, while prime gaps
-grow only like `(ln p)²` (Cramér's conjecture). At `10¹⁵` the window has 22 million numbers, while the
-largest known gap below `2⁶⁴ ≈ 1.8·10¹⁹` is 1,550.
+grow only like `(ln p)²` (Cramér's conjecture [1]). At `10¹⁵` the window has 22 million numbers, while the
+largest known gap below `2⁶⁴ ≈ 1.8·10¹⁹` is 1,550 [7][8][9].
 
 Tests with an empty `@a`, one pass per prime:
 
@@ -224,7 +224,7 @@ Tests with an empty `@a`, one pass per prime:
 Only at `p = 113` (gap 14 > window 12) and `p = 1327` (gap 34 > window 30) is a gap longer than the
 window. Even there the pass finds the right next prime, because lownumbers reach past
 `@firstblock`. From about 1,400 upward the window is always many times longer than any known gap.
-For numbers below `2⁶⁴` all maximal gaps are known, so the method is guaranteed there. For arbitrarily
+For numbers below `2⁶⁴` all maximal gaps are known [8][9], so the method is guaranteed there. For arbitrarily
 large numbers it is not proven: it needs every gap to be shorter than ~0.707·√p.
 
 ### Cramér's conjecture read off the window
@@ -237,7 +237,7 @@ Because `W ≈ √(p/2)`:
 ln p = 2·ln W + ln 2          (ln p)² = (2·ln W + ln 2)²
 ```
 
-Cramér's conjecture `gap = O((ln p)²)` can therefore be written directly in terms of the window:
+Cramér's conjecture `gap = O((ln p)²)` [1][2] can therefore be written directly in terms of the window:
 
 ```
 √gap  ≲  2·ln W + ln 2
@@ -246,9 +246,16 @@ Cramér's conjecture `gap = O((ln p)²)` can therefore be written directly in te
 Plotting `√(record gap)` against `ln(window)` gives a straight line with slope 2 (panel C).
 
 For `p = 1,693,182,318,746,371`: `ln W = 17.19`, `2·ln W + ln 2 = 35.1`, `√1132 = 33.6`. Its ratio
-`gap/(ln p)² = 0.9206` is the largest known for all numbers below `2⁶⁴` (the Cramér–Shanks–Granville ratio).
+`gap/(ln p)² = 0.9206` is the largest known for all numbers below `2⁶⁴` (the Cramér–Shanks–Granville ratio) [5][6].
 
-This is a conjectured order of magnitude, not an exact bound. Granville suggests gaps may occasionally
+**About this prime and gap.** The graph starts from the real prime `1,693,182,318,746,371`. It is followed
+by the known maximal prime gap of **1132**, the first *kilogap* (the first known prime gap of 1000 or more),
+discovered by Bertil Nyman on 24 January 1999. Its Cramér–Shanks–Granville ratio `gap/(ln p)² ≈ 0.9206`
+is still one of the highest ever observed. One pass of the block sieve from this prime finds the gap
+correctly: the next prime `1,693,182,318,747,503` is the first unmarked number in the window.
+Sources: [5][6].
+
+This is a conjectured order of magnitude, not an exact bound. Granville [3] suggests gaps may occasionally
 exceed `(ln p)²` by up to ~1.12×.
 
 **A narrower window.** When only the next prime is needed, a window of `2·(2·ln W + ln 2)²`
@@ -260,8 +267,8 @@ found inside the window, the window is doubled and the pass repeated.
 
 ## 6. How many primes are in a window
 
-The exact count needs sieving (this pass) or a π(x) algorithm. Estimating it is easy with the
-prime number theorem:
+The exact count needs sieving (this pass) or a π(x) algorithm [16]. Estimating it is easy with the
+prime number theorem [19]:
 
 ```
 count ≈ W / ln p ≈ √(p/2) / ln p
@@ -278,7 +285,7 @@ Over 300 random windows at `10¹²` (~30,800 primes each), the standard deviatio
 
 If the teeth crossed out independently, the count would be `W·Π(1 − 1/q)` over the primes `q ≤ √F`.
 That estimate is 12.3 % too high in every window: the ratio is `2·e^(−γ) = 1.1229`, where
-`γ = 0.5772` is the Euler–Mascheroni constant (Mertens' paradox).
+`γ = 0.5772` is the Euler–Mascheroni constant (Mertens' paradox, from Mertens' theorem [20]; see also [3]).
 
 ---
 
@@ -288,10 +295,10 @@ Requirements: Python 3.9+, `numpy`. `numba` is strongly recommended (`pip instal
 `cupy` is optional and gives no real benefit (see [section 10](#10-limits-and-possible-improvements)).
 
 ```
-python sieve_en.py
+python primes-sieve-bydomi.py
 ```
 
-Settings at the bottom of `sieve_en.py`:
+Settings at the bottom of `primes-sieve-bydomi.py`:
 
 | setting | meaning |
 |---|---|
@@ -334,7 +341,7 @@ Functions you can call from your own code:
 | `search(start, count_p, …)` | prime mode (one next prime per pass); keeps `s.history` |
 | `check_against_list(found, reference)` | compares a result file with your list and prints the differences |
 | `compare(start, count_p)` | checks that the fast backend equals the original row-by-row port |
-| `is_prime(n)` | deterministic Miller-Rabin (n < 3.3·10²⁴) |
+| `is_prime(n)` | deterministic Miller-Rabin [10][11] with the first 13 prime bases (n < 3.3·10²⁴ [12]) |
 
 ---
 
@@ -358,7 +365,7 @@ To keep the comparison fair:
 - For **one** number Miller-Rabin wins clearly: 80 µs against ~0.9 s for a sieve pass. For very large
   numbers (e.g. 10³⁰) a window of `√p` is impossible. Miller-Rabin is the checker, the sieve the generator.
 - Variant C below (remainder at the break, prime `q` only) takes ~0.09 s per window at `10¹⁵`,
-  about 0.14 µs per prime. Specialised libraries such as *primesieve* are in the same range or faster.
+  about 0.14 µs per prime. Specialised libraries such as *primesieve* [17] are in the same range or faster.
 
 **Development of the speed** (one next prime at `10¹⁵`):
 
@@ -403,9 +410,10 @@ procedure stops early (`@stop`) and the final fill by 6 marks wrong numbers.
   `unsigned __int128` (up to ~3.4·10³⁸). The practical ceiling is not the data type but the work per pass
   (~1.68·√N blocks: ~21 s at 10¹⁸, ~6 h at 10²⁴) and the memory of the window (~0.35·√N bytes).
   A bit map, a segmented or narrow window and variant C (π(√N) steps) push it further. For numbers
-  above 3.3·10²⁴ the Miller-Rabin check needs more bases or BPSW.
+  above 3.3·10²⁴ the Miller-Rabin check needs more bases or BPSW [13][14].
 - Correctness for arbitrarily large numbers is not proven. It requires every prime gap to be shorter
-  than the window (~0.707·√p), which follows from Cramér's conjecture but not from proven results.
+  than the window (~0.707·√p), which follows from Cramér's conjecture but not from proven results
+  (the best proven bound guarantees a prime in `[x, x + x^0.525]` [4], which is longer than the window).
   Below 2⁶⁴ it is guaranteed by the known record gaps.
 - No GPU benefit: the chain of jumps is sequential.
 
@@ -429,7 +437,63 @@ The start cannot go beyond `√N`.
 | C: like B, prime q only | π(√N) | 78,497 | 1,951,956 |
 
 In variant B the start of each tooth is computed directly from the remainder `N mod q`, so the
-three-point test is not needed. Variant C is a segmented sieve of Eratosthenes over the window.
+three-point test is not needed. Variant C is a segmented sieve of Eratosthenes over the window [15].
+
+---
+
+## References
+
+**Prime gaps and Cramér's conjecture**
+
+1. H. Cramér, *On the order of magnitude of the difference between consecutive prime numbers*,
+   Acta Arithmetica 2 (1936), 23–46. [EuDML](https://eudml.org/doc/205441)
+2. D. Shanks, *On maximal gaps between successive primes*, Mathematics of Computation 18 (1964), 646–651.
+3. A. Granville, *Harald Cramér and the distribution of prime numbers*, Scandinavian Actuarial Journal
+   1995(1), 12–28.
+4. R. C. Baker, G. Harman, J. Pintz, *The difference between consecutive primes, II*,
+   Proceedings of the London Mathematical Society 83(3) (2001), 532–562.
+
+**Record gaps and the gap of 1132**
+
+5. T. R. Nicely, *First occurrence of a prime gap of 1000 or greater* (gap 1132 after 1,693,182,318,746,371,
+   B. Nyman, 1999; CSG ratio 0.9206386). [Web page](https://faculty.lynchburg.edu/~nicely/gaps/gaps2.html)
+6. T. R. Nicely, B. Nyman, *New prime gaps between 10¹⁵ and 5·10¹⁶*, Journal of Integer Sequences 6 (2003),
+   Article 03.3.1. [Web page](https://faculty.lynchburg.edu/~nicely/gaps/gaps3.html)
+7. T. Oliveira e Silva, S. Herzog, S. Pardi, *Empirical verification of the even Goldbach conjecture and
+   computation of prime gaps up to 4·10¹⁸*, Mathematics of Computation 83 (2014), 2033–2060.
+   [AMS](https://www.ams.org/journals/mcom/2014-83-288/S0025-5718-2013-02787-1/)
+8. M. Visser, *Verifying the Firoozbakht, Nicholson, and Farhadian conjectures up to the 81st maximal prime
+   gap* (all maximal gaps below 2⁶⁴ known), 2019. [arXiv:1904.00499](https://arxiv.org/abs/1904.00499)
+9. OEIS [A002386](https://oeis.org/A002386) (primes starting a maximal gap) and
+   [A005250](https://oeis.org/A005250) (record gaps); T. R. Nicely,
+   [maximal prime gaps](https://faculty.lynchburg.edu/~nicely/gaps/gaps.html).
+
+**Primality tests**
+
+10. G. L. Miller, *Riemann's hypothesis and tests for primality*, Journal of Computer and System Sciences 13
+    (1976), 300–317.
+11. M. O. Rabin, *Probabilistic algorithm for testing primality*, Journal of Number Theory 12 (1980), 128–138.
+12. J. Sorenson, J. Webster, *Strong pseudoprimes to twelve prime bases*, Mathematics of Computation,
+    doi:10.1090/mcom/3134. [arXiv:1509.00864](https://arxiv.org/abs/1509.00864)
+13. R. Baillie, S. S. Wagstaff Jr., *Lucas pseudoprimes*, Mathematics of Computation 35 (1980), 1391–1417.
+14. C. Pomerance, J. L. Selfridge, S. S. Wagstaff Jr., *The pseudoprimes to 25·10⁹*,
+    Mathematics of Computation 35 (1980), 1003–1026.
+
+**Sieves and counting primes**
+
+15. C. Bays, R. H. Hudson, *The segmented sieve of Eratosthenes and primes in arithmetic progressions
+    to 10¹²*, BIT 17 (1977), 121–127.
+16. M. Deléglise, J. Rivat, *Computing π(x): the Meissel, Lehmer, Lagarias, Miller, Odlyzko method*,
+    Mathematics of Computation 65 (1996), 235–245.
+17. K. Walisch, *primesieve* – fast prime number generator. [GitHub](https://github.com/kimwalisch/primesieve)
+
+**Tools and classical results**
+
+18. S. K. Lam, A. Pitrou, S. Seibert, *Numba: a LLVM-based Python JIT compiler*,
+    Proceedings of the Second Workshop on the LLVM Compiler Infrastructure in HPC (2015).
+19. J. Hadamard (1896), C.-J. de la Vallée Poussin (1896): the prime number theorem, π(x) ~ x / ln x.
+20. F. Mertens, *Ein Beitrag zur analytischen Zahlentheorie*, Journal für die reine und angewandte
+    Mathematik 78 (1874), 46–62.
 
 ---
 
