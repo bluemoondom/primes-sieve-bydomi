@@ -512,4 +512,6 @@ three-point test is not needed. Variant C is a segmented sieve of Eratosthenes o
 ---
 
 Original T-SQL: `dbo.prime_search` (with the remainder test `@diff2 % @diff1`) and
-`dbo.prime_search2` (with `@firstblock = @mynum + 2·@numblock + 2`).
+`dbo.prime_search2` (with `@firstblock = @mynum + 2·@numblock + 2`), written by Dominika in 2024.
+
+And yes, Dominika is a woman (she/her).
