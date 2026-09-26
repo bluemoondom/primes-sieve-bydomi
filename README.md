@@ -433,17 +433,5 @@ three-point test is not needed. Variant C is a segmented sieve of Eratosthenes o
 
 ---
 
-## 11. Files
-
-| file | content |
-|---|---|
-| `sieve_en.py` | the sieve (English), all backends, window and prime mode |
-| `sito2.py` | the same in Czech (prime mode) |
-| `kontrola_mr.py` | Miller-Rabin check of a range of odd numbers (true/false with time) |
-| `sieve_teeth_explained.png/.svg` | the teeth for N = 87,517: lengths, breaks, levels |
-| `sieve_window_explained.png/.svg` | the window for p = 1,693,182,318,746,371 |
-| `cramer_window.png/.svg` | Cramér's conjecture and the logarithm of the window |
-| `zuby_87517.png` | the teeth with the blocks visited by the improved procedure |
-
 Original T-SQL: `dbo.prime_search` (with the remainder test `@diff2 % @diff1`) and
 `dbo.prime_search2` (with `@firstblock = @mynum + 2·@numblock + 2`).
