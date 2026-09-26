@@ -11,27 +11,19 @@ number, and the whole window yields all primes in it at once.
 At `p ≈ 1.7·10¹⁵` one pass takes about 1 second and returns ~830,000 primes
 (**≈ 1.2 µs per prime**).
 
-> [!IMPORTANT]
-> **The key property is not the speed, but that the next prime comes from one prime alone.**
->
-> - **The only input is the prime `p`.** No table of small primes, no primality test and no state
->   from earlier runs are needed. A classic segmented sieve [15] must first compute all sieving
->   primes up to `√(p + W)`. Library functions such as `next_prime` test the candidates one by one
->   with a primality test [10][11].
-> - **One pass over a window of `~0.707·√p`** (started from the prime) marks every composite in it.
->   It gives the next prime, however far away it is, and all other primes of the window.
-> - **The mechanism:** the factors are taken in reverse order (the larger factor `d` goes up from
->   `√(p/2)`, the co-factor `q` goes down to 3), and arithmetic progressions (the *teeth*) are
->   detected so that the sieve can jump from one tooth to the next.
-
 > [!NOTE]
-> **Honest positioning.** Finding the next prime after a given prime is common: practically every
-> modern sieve and every `next_prime` function can do it. A sieve over *all* odd divisors up to
-> `√(p + W)` also needs no table of primes, and needs fewer steps (`½·√p` instead of `~1.68·√p`,
-> variant B in [section 10](#10-limits-and-possible-improvements)). What is specific to this algorithm
-> is *how* it discovers the divisors: reversed order of the factors plus jumps over the teeth,
-> started from the prime itself. We are not aware of a published algorithm that works the same way,
-> but this has not been checked systematically against the literature.
+> **The next prime is computed from the prime `p` alone.**
+>
+> - The only input is `p`: no table of small primes, no primality test and no state from earlier
+>   runs are used. (A classic segmented sieve [15] first computes the sieving primes up to `√(p + W)`;
+>   `next_prime` functions test candidates one by one with a primality test [10][11].)
+> - One pass over a window of `~0.707·√p` marks every composite in it, so it gives the next prime and
+>   all other primes of the window. Checked for all record prime gaps below `2⁶⁴` (see [section 5](#5-the-window-and-prime-gaps)).
+> - The factors are taken in reverse order (the larger factor `d` goes up from `√(p/2)`, the co-factor
+>   `q` goes down to 3), and arithmetic progressions (the *teeth*) are detected so that the sieve can
+>   jump from one tooth to the next.
+> - A sieve over all odd divisors up to `√(p + W)` also needs no table of primes and takes fewer steps
+>   (`½·√p` instead of `~1.68·√p`, variant B in [section 10](#10-limits-and-possible-improvements)).
 
 ---
 
